@@ -104,9 +104,6 @@ with open(file, 'w', encoding='UTF8', newline='') as f:
                 or (any(word in reply.full_text for word in blacklist)
                 and len(reply.full_text) < 16)):
                     print('Reached reply number: ' + str(count))
-                    api.create_friendship(user_id = reply.author.id)
-                    print('Followed ' + reply.author.screen_name)
-                    time.sleep(15)
                     reply_url = link + reply.author.screen_name + '/status/' + reply.id_str
                     # screenshot the reply
                     asyncio.run(tweet_capture.screenshot(reply_url, screenshot_file, mode=3, night_mode=2))
