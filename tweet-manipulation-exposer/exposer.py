@@ -42,25 +42,27 @@ with open('blacklist.txt', 'r', encoding='UTF8') as f:
     blacklist  = [line.strip() for line in f]
 
 # fetch the tweet from URL and proccess some variables
-######### Fill this variable #########
-tweet_url = ""
+tweet_url = input("Enter tweet link: ")
 tweet_id = tweet_url.split('/')[-1]
 tweet = api.get_status(tweet_id)
 user_object = tweet.author 
 user = user_object.screen_name
+print("Tweet by: " + user + ":")
+print(tweet.text.replace("\n", " "))
 
 # variable for the screenshot file name
 screenshot_file = 'screenshot.png'
 # screenshot the reply
 asyncio.run(tweet_capture.screenshot(tweet_url, screenshot_file, mode=3, night_mode=2))
 # upload to imgur and parse the link
-image = imgur_client.upload_from_path(screenshot_file, config=None, anon=True)
-image_url = image["link"]
+#image = imgur_client.upload_from_path(screenshot_file, config=None, anon=True)
+#image_url = image["link"]
+image_url = "blank"
 # delete the screenshot from disk
-os.remove(screenshot_file)
+#os.remove(screenshot_file)
 
 # prepare CSV headers
-header = ['User ID', 'Username', 'Display Name', 'Follower Count', 'Reply', 'Screenshot']
+header = ['Author User ID', 'Author Username', 'Reply User ID', 'Reply Username', 'Reply Display Name', 'Reply Follower Count', 'Reply', 'Screenshot']
 
 # prepare CSV file name variable
 file = 'replies_to_'+ user + '_' + tweet_id + '.csv'
@@ -72,9 +74,9 @@ with open(file, 'w', encoding='UTF8', newline='') as f:
     # create the csv writer
     writer = csv.writer(f)
     # write wthe original tweet header
-    writer.writerow(['Author User ID', 'Author Username', 'Author Display Name', 'Author Follower Count', 'Original Tweet'])
+    #writer.writerow(['Author User ID', 'Author Username', 'Author Display Name', 'Author Follower Count', 'Original Tweet'])
     # write the original tweet details
-    writer.writerow([user_object.id_str, user, user_object.name, user_object.followers_count, tweet.text.replace("\n", " "), image_url])
+    #writer.writerow([user_object.id_str, user, user_object.name, user_object.followers_count, tweet.text.replace("\n", " "), image_url])
     # write the replies header
     writer.writerow(header)
     # initalize a list for replies
@@ -111,9 +113,9 @@ with open(file, 'w', encoding='UTF8', newline='') as f:
                     image = imgur_client.upload_from_path(screenshot_file, config=None, anon=True)
                     image_url = image["link"]
                     # delete the screenshot from disk
-                    os.remove(screenshot_file)
+                    #os.remove(screenshot_file)
                     # write the reply details in the CSV file
-                    data = [reply.author.id_str, reply.author.screen_name, reply.author.name, reply.author.followers_count, reply.full_text.replace("\n", " "), image_url]
+                    data = [user_object.id_str, user, reply.author.id_str, reply.author.screen_name, reply.author.name, reply.author.followers_count, reply.full_text.replace("\n", " "), image_url]
                     writer.writerow(data)
         # raise an exception if the API rate limit reached
         except tweepy.TooManyRequests as e:
@@ -126,7 +128,7 @@ with open(file, 'w', encoding='UTF8', newline='') as f:
         # break condition if finished iterating all replies
         except StopIteration:
             # delete the screenshot from disk
-            os.remove(screenshot_file)
+            #os.remove(screenshot_file)
             print('Finished successfully. Data written to: ' + file)
             break
         except Exception as e:
